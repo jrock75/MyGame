@@ -1,0 +1,33 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+sysinfo.txt
+*.pidb
+*.suo
+*.user
+*.userprefs
+*.csproj
+*.unityproj
+*.dll
+*.exe
+*.apk
+*.aab
+*.app
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vscode/
+
+# .NET / C#
+bin/
+obj/
+*.log
+*.vs/
+*.user
+*.suo
+*.cache

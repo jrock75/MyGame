@@ -5,29 +5,18 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
-sysinfo.txt
-*.pidb
-*.suo
-*.user
-*.userprefs
-*.csproj
-*.unityproj
-*.dll
-*.exe
-*.apk
-*.aab
-*.app
-*.pdb
-*.mdb
-*.opendb
-*.VC.db
-.vscode/
+UserSettings/
 
-# .NET / C#
-bin/
-obj/
-*.log
-*.vs/
+# Visual Studio
+.vs/
+*.csproj
+*.sln
 *.user
-*.suo
-*.cache
+*.unityproj
+
+# Rider
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

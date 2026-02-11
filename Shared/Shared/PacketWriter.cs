@@ -1,10 +1,9 @@
-﻿using MyServer.GameLogic;
-using System;
+﻿using System;
 using System.IO;
 using System.Numerics;
 using System.Text;
 
-namespace MyServer.Networking
+namespace MyGame.Shared
 {
     public sealed class PacketWriter : IDisposable
     {

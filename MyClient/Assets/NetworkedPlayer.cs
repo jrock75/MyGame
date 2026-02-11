@@ -1,5 +1,4 @@
-using MyServer.GameLogic;
-using MyServer.Networking;
+using MyGame.Shared;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,7 +6,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
 public class NetworkedPlayer : MonoBehaviour
@@ -76,9 +74,9 @@ public class NetworkedPlayer : MonoBehaviour
         {
             PlayerGuid = myPlayerGuid,
             playerName = playerName,
-            position = transform.position,
-            rotation = transform.rotation,
-            velocity = Vector3.zero,
+            position = NetConversions.ToNumerics(transform.position),
+            rotation = NetConversions.ToNumerics(transform.rotation),
+            velocity = NetConversions.ToNumerics(Vector3.zero),
             isAlive = true
         };
 
@@ -112,8 +110,8 @@ public class NetworkedPlayer : MonoBehaviour
             Quaternion targetRot = Quaternion.LookRotation(moveDir);
             rb.MoveRotation(Quaternion.RotateTowards(rb.rotation, targetRot, rotationSpeed * Time.fixedDeltaTime));
 
-            predictedState.position = rb.position;
-            predictedState.rotation = rb.rotation;
+            predictedState.position = NetConversions.ToNumerics(rb.position);
+            predictedState.rotation = NetConversions.ToNumerics(rb.rotation);
         }
     }
     #endregion
@@ -198,8 +196,8 @@ public class NetworkedPlayer : MonoBehaviour
         {
             if (kvp.Key == myPlayerGuid) continue;
             GameObject go = remotePlayers[kvp.Key];
-            go.transform.position = Vector3.Lerp(go.transform.position, kvp.Value.position, 10f * Time.deltaTime);
-            go.transform.rotation = Quaternion.Slerp(go.transform.rotation, kvp.Value.rotation, 10f * Time.deltaTime);
+            go.transform.position = Vector3.Lerp(go.transform.position, NetConversions.ToUnity(kvp.Value.position), 10f * Time.deltaTime);
+            go.transform.rotation = Quaternion.Slerp(go.transform.rotation, NetConversions.ToUnity(kvp.Value.rotation), 10f * Time.deltaTime);
         }
     }
 
@@ -207,10 +205,10 @@ public class NetworkedPlayer : MonoBehaviour
     {
         if (playerStates.TryGetValue(myPlayerGuid, out var serverState))
         {
-            if (Vector3.Distance(transform.position, serverState.position) > 0.05f)
+            if (Vector3.Distance(transform.position, NetConversions.ToUnity(serverState.position)) > 0.05f)
             {
-                transform.position = Vector3.Lerp(transform.position, serverState.position, 0.2f);
-                transform.rotation = Quaternion.Slerp(transform.rotation, serverState.rotation, 0.2f);
+                transform.position = Vector3.Lerp(transform.position, NetConversions.ToUnity(serverState.position), 0.2f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, NetConversions.ToUnity(serverState.rotation), 0.2f);
             }
         }
     }

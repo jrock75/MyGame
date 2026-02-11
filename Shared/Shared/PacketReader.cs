@@ -1,21 +1,24 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using System.Text;
-using UnityEngine;
-using MyServer.GameLogic;
 
-namespace MyServer.Networking
+namespace MyGame.Shared
 {
     public sealed class PacketReader : IDisposable
     {
-        private const int MaxStringLength = 1024 * 1024;
+        private const int MaxStringLength = 1024 * 1024; // 1 MB safety cap
+        private const int NullPlayerId = -1;
+
         private readonly MemoryStream memoryStream;
         private readonly BinaryReader reader;
         private bool disposed;
 
         public PacketReader(byte[] data)
         {
-            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
             memoryStream = new MemoryStream(data, writable: false);
             reader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: false);
         }
@@ -23,68 +26,101 @@ namespace MyServer.Networking
         // --------------------
         // Primitive reads
         // --------------------
-        public int ReadInt32() { EnsureAvailable(sizeof(int)); return reader.ReadInt32(); }
-        public float ReadFloat() { EnsureAvailable(sizeof(float)); return reader.ReadSingle(); }
-        public bool ReadBoolean() { EnsureAvailable(sizeof(bool)); return reader.ReadBoolean(); }
 
-        // --------------------
-        // GUID
-        // --------------------
-        public Guid ReadGuid()
+        public int ReadInt32()
         {
-            EnsureAvailable(16);
-            byte[] bytes = reader.ReadBytes(16);
-            return new Guid(bytes);
+            EnsureAvailable(sizeof(int));
+            return reader.ReadInt32();
+        }
+
+        public float ReadFloat()
+        {
+            EnsureAvailable(sizeof(float));
+            return reader.ReadSingle();
+        }
+
+        public bool ReadBoolean()
+        {
+            EnsureAvailable(sizeof(bool));
+            return reader.ReadBoolean();
         }
 
         // --------------------
-        // Strings
+        // String read
         // --------------------
+
         public string? ReadString()
         {
             EnsureAvailable(sizeof(byte));
             byte type = reader.ReadByte();
+
             switch (type)
             {
-                case 0: return null;
-                case 1: return string.Empty;
-                case 2:
+                case 0: // null
+                    return null;
+
+                case 1: // empty
+                    return string.Empty;
+
+                case 2: // short string (byte length)
                     {
                         EnsureAvailable(sizeof(byte));
-                        int len = reader.ReadByte();
-                        ValidateStringLength(len);
-                        EnsureAvailable(len);
-                        return Encoding.UTF8.GetString(reader.ReadBytes(len));
+                        int length = reader.ReadByte();
+
+                        ValidateStringLength(length);
+                        EnsureAvailable(length);
+
+                        return Encoding.UTF8.GetString(reader.ReadBytes(length));
                     }
-                case 3:
+
+                case 3: // long string (int length)
                     {
                         EnsureAvailable(sizeof(int));
-                        int len = reader.ReadInt32();
-                        ValidateStringLength(len);
-                        EnsureAvailable(len);
-                        return Encoding.UTF8.GetString(reader.ReadBytes(len));
+                        int length = reader.ReadInt32();
+
+                        ValidateStringLength(length);
+                        EnsureAvailable(length);
+
+                        return Encoding.UTF8.GetString(reader.ReadBytes(length));
                     }
+
                 default:
                     throw new InvalidDataException($"Unknown string type: {type}");
             }
         }
 
         // --------------------
-        // Vector / Quaternion
+        // Math types
         // --------------------
+
         public Vector3 ReadVector3()
         {
-            return new Vector3(ReadFloat(), ReadFloat(), ReadFloat());
+            return new Vector3(
+                ReadFloat(),
+                ReadFloat(),
+                ReadFloat()
+            );
         }
 
         public Quaternion ReadQuaternion()
         {
-            return new Quaternion(ReadFloat(), ReadFloat(), ReadFloat(), ReadFloat());
+            return new Quaternion(
+                ReadFloat(),
+                ReadFloat(),
+                ReadFloat(),
+                ReadFloat()
+            );
+        }
+        public Guid ReadGuid()
+        {
+            byte[] bytes = reader.ReadBytes(16); // GUID is 16 bytes
+            return new Guid(bytes);
         }
 
         // --------------------
-        // PlayerState
+        // Game-specific types
         // --------------------
+
         public PlayerState ReadPlayerState()
         {
             Guid playerGuid = ReadGuid();         // matches WriteGuid
@@ -108,19 +144,22 @@ namespace MyServer.Networking
         // --------------------
         // Position helpers
         // --------------------
+
         public int Position => (int)memoryStream.Position;
         public int Length => (int)memoryStream.Length;
-        public bool HasRemaining => Position < Length;
 
         internal void SetPosition(int position)
         {
-            if (position < 0 || position > memoryStream.Length) throw new ArgumentOutOfRangeException();
+            if (position < 0 || position > memoryStream.Length)
+                throw new ArgumentOutOfRangeException(nameof(position));
+
             memoryStream.Position = position;
         }
 
         // --------------------
         // Safety helpers
         // --------------------
+
         private void EnsureAvailable(int byteCount)
         {
             if (memoryStream.Length - memoryStream.Position < byteCount)
@@ -136,9 +175,12 @@ namespace MyServer.Networking
         // --------------------
         // Dispose
         // --------------------
+
         public void Dispose()
         {
-            if (disposed) return;
+            if (disposed)
+                return;
+
             disposed = true;
             reader.Dispose();
         }

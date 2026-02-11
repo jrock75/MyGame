@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="../Shared/Shared/Shared.csproj" Id="2f25cc06-9fd9-41d4-8f6f-8843989b67e8" />
   <Project Path="MyServer.csproj" />
 </Solution>

@@ -1,15 +1,11 @@
-﻿using System;
+﻿using MyGame.Shared;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using MyServer.GameLogic;
-using MyServer.Networking;
 
-namespace MyServer
+
+namespace MyGame.Server
 {
     public class GameServer
     {

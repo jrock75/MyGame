@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace MyServer
+﻿namespace MyGame.Server
 {
     public static class AuthState
     {

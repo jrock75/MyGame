@@ -20,3 +20,10 @@ UserSettings/
 # OS
 .DS_Store
 Thumbs.db
+
+# .NET build outputs
+MyServer/bin/
+Shared/Shared/bin/
+
+# Unity generated DLLs (optional if you rebuild from source)
+MyClient/Assets/Plugins/*.dll

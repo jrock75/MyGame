@@ -34,6 +34,7 @@ Server	.NET 10
 Shared	.NET Standard 2.1
 Protocol	UDP
 Model	Server-authoritative
+
 🌐 Networking Model
 
 UDP transport
